@@ -15,6 +15,10 @@ class LogStash::Agent < Clamp::Command
     I18n.t("logstash.agent.flag.filterworkers"),
     :attribute_name => :filter_workers, :default => 1, &:to_i
 
+  option ["-o", "--outputworkers"], "COUNT",
+    I18n.t("logstash.agent.flag.outputworkers"),
+    :attribute_name => :output_workers, :default => 1, &:to_i
+
   option "--watchdog-timeout", "SECONDS", 
     I18n.t("logstash.agent.flag.watchdog-timeout"),
     :default => 10, &:to_f
@@ -125,6 +129,7 @@ class LogStash::Agent < Clamp::Command
     end
 
     pipeline.configure("filter-workers", filter_workers)
+    pipeline.configure("output-workers", output_workers)
 
     @logger.unsubscribe(stdout_logs) if show_startup_errors
 
