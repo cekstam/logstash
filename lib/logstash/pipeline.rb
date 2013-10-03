@@ -38,6 +38,7 @@ class LogStash::Pipeline
     end
     @settings = {
       "filter-workers" => 1,
+      "output-workers" => 1
     }
   end # def initialize
 
@@ -136,9 +137,9 @@ class LogStash::Pipeline
   end
 
   def start_outputs
-    @output_threads = [
+    @output_threads = @settings["output-workers"].times.collect do
       Thread.new { outputworker }
-    ]
+    end
   end
 
   def start_input(plugin)
@@ -208,7 +209,10 @@ class LogStash::Pipeline
     @outputs.each(&:register)
     while true
       event = @filter_to_output.pop
-      break if event == LogStash::ShutdownSignal
+      if event == LogStash::ShutdownSignal
+        @filter_to_output.push(event)
+        break
+      end
       output(event)
     end # while true
     @outputs.each(&:teardown)
